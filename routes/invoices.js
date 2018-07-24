@@ -44,17 +44,17 @@ router.delete('/:id/delete', (req, res, next) => {
   )
 })
 
-router.get('/list', (req, res) => {
-  const pageNumber = req.query.PageNumber
-  const recordsPerPage = 10
-  const searchText = req.query.searchText
+// router.get('/list', (req, res) => {
+//   const pageNumber = req.query.PageNumber
+//   const recordsPerPage = 10
+//   const searchText = req.query.searchText
 
-  InvoiceModel.find({ skip: pageNumber * recordsPerPage, limit: recordsPerPage })
-    .then(items => {
-      if(!items) { return res.status(404)}
-      return res.status(200).json({ success:true, items})
-    })
-})
+//   InvoiceModel.find({ skip: pageNumber * recordsPerPage, limit: recordsPerPage })
+//     .then(items => {
+//       if(!items) { return res.status(404)}
+//       return res.status(200).json({ success:true, items})
+//     })
+// })
 
 router.get('/detail/:id', function(req, res, next) {
   InvoiceDetailModel.findOne({_id:req.params.id})
@@ -64,7 +64,13 @@ router.get('/detail/:id', function(req, res, next) {
 })
 
 router.get('/:id/details', function(req, res, next) {
-  InvoiceDetailModel.find({invoiceId:  req.params.id})
+  const { page } = req.query
+  const invoicesPerPage = 5
+
+  InvoiceDetailModel
+    .find({invoiceId:  req.params.id})
+    .skip((page - 1) * invoicesPerPage)
+    .limit(invoicesPerPage)
     .then(items => {
       if(!items) { return res.status(404)}
       res.status(200).json({ success:true, items})
@@ -94,7 +100,7 @@ router.post('/:id/details/create', function(req, res, next) {
 })
 
 router.put('/details/:detailId/edit', function(req, res, next) {
-  InvoiceDetailsModel.findByIdAndUpdate
+  InvoiceDetailModel.findByIdAndUpdate
     (
       req.params.detailId,
       req.body,
